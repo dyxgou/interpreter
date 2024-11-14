@@ -55,3 +55,20 @@ func New(k TokenKind, literal string) Token {
 	}
 }
 
+var keywords = map[string]TokenKind{
+	"let":    LET,
+	"fn":     FUNCTION,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETURN,
+	"true":   TRUE,
+	"false":  FALSE,
+}
+
+func LookupIdent(ident string) TokenKind {
+	if tok, ok := keywords[ident]; ok {
+		return tok
+	}
+
+	return IDENT
+}
