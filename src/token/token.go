@@ -3,8 +3,8 @@ package token
 type TokenKind byte
 
 const (
-	ILLEGAL TokenKind = iota
-	EOF
+	EOF TokenKind = iota
+	ILLEGAL
 
 	// Identifies + literals
 	IDENT
@@ -13,6 +13,14 @@ const (
 	// Operators
 	ASSIGN
 	PLUS
+	MINUS
+	MULTIPLICATION
+	DIVISION
+	LESS
+	GREATER
+	NOT
+	EQUAL
+	NOT_EQUAL
 
 	// Delimiters
 	COMMA
@@ -22,21 +30,28 @@ const (
 	RPAREN
 	LBRACE
 	RBRACE
+	QOUTE
 
 	// Keywords
 	FUNCTION
 	LET
+	TRUE
+	FALSE
+	RETURN
+	IF
+	ELSE
 )
 
 type Token struct {
-	kind    TokenKind
+	Kind    TokenKind
 	Literal string
 }
 
 // Creates a new token
 func New(k TokenKind, literal string) Token {
 	return Token{
-		kind:    k,
+		Kind:    k,
 		Literal: literal,
 	}
 }
+
