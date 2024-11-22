@@ -2,10 +2,28 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 
 	"gihub.com/dyxgou/parser/src/ast"
 	"gihub.com/dyxgou/parser/src/lexer"
 	"gihub.com/dyxgou/parser/src/token"
+)
+
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+)
+
+type Precendence byte
+
+const (
+	LOWEST Precendence = iota
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
 )
 
 type Parser struct {
@@ -15,17 +33,33 @@ type Parser struct {
 
 	curToken  token.Token
 	readToken token.Token
+
+	prefixParseFns map[token.TokenKind]prefixParseFn
+	infixParseFns  map[token.TokenKind]infixParseFn
 }
 
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l: l,
+		l:              l,
+		prefixParseFns: make(map[token.TokenKind]prefixParseFn, 20),
+		infixParseFns:  make(map[token.TokenKind]infixParseFn, 20),
 	}
+
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 
 	p.nextToken()
 	p.nextToken()
 
 	return p
+}
+
+func (p *Parser) registerPrefix(k token.TokenKind, fn prefixParseFn) {
+	p.prefixParseFns[k] = fn
+}
+
+func (p *Parser) registerInfix(k token.TokenKind, fn infixParseFn) {
+	p.infixParseFns[k] = fn
 }
 
 func (p *Parser) nextToken() {
@@ -56,8 +90,40 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
+		return p.parseExpressionStatement()
+	}
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{
+		Token: p.curToken,
+	}
+}
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{
+		Token: p.curToken,
+	}
+
+	stmt.Expression = p.parseExpression(LOWEST)
+
+	if p.readTokenIs(token.SEMI) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseExpression(pr Precendence) ast.Expression {
+	prefixFn, ok := p.prefixParseFns[p.curToken.Kind]
+
+	if !ok {
 		return nil
 	}
+
+	leftExp := prefixFn()
+
+	return leftExp
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {
@@ -85,6 +151,24 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	return letStmt
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	intStmt := &ast.IntegerLiteral{
+		Token: p.curToken,
+	}
+
+	v, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+
+	if err != nil {
+		err := fmt.Errorf("could not parse %s into an Integer", p.curToken.Literal)
+		p.errors = append(p.errors, err)
+		return nil
+	}
+
+	intStmt.Value = v
+
+	return intStmt
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
