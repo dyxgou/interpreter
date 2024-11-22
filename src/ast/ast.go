@@ -1,9 +1,10 @@
 package ast
 
-import "gihub.com/dyxgou/parser/src/token"
+import "strings"
 
 type Node interface {
 	TokenLiteral() string
+	String() string
 }
 
 type Statement interface {
@@ -28,14 +29,12 @@ func NewProgram() *Program {
 	}
 }
 
-type Identifier struct {
-	Token token.Token // token.IDENT
-}
+func (p *Program) String() string {
+	var sb strings.Builder
 
-func (i *Identifier) Value() string {
-	return i.Token.Literal
-}
+	for _, stmt := range p.Statements {
+		sb.WriteString(stmt.String())
+	}
 
-func (i *Identifier) TokenLiteral() string {
-	return i.Token.Literal
+	return sb.String()
 }
