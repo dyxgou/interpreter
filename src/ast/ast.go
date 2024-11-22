@@ -16,7 +16,7 @@ type Statement interface {
 type Expression interface {
 	Node
 
-	expressionStatement()
+	expressionNode()
 }
 
 type Program struct {
