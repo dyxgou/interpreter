@@ -197,5 +197,40 @@ func TestIntegerLiteral(t *testing.T) {
 	if tl := literal.TokenLiteral(); tl != "5" {
 		t.Fatalf("stmt.TokenLiteral() is not '5'. got=%s", tl)
 	}
+}
+
+func TestParsingPrefixExpression(t *testing.T) {
+	prefixTest := []struct {
+		input    string
+		operator string
+		value    int64
+	}{
+		{"!5;", "!", 5},
+		{"!5;", "!", 5},
+	}
+
+	for _, tt := range prefixTest {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+
+		if ps := len(program.Statements); ps != 1 {
+			t.Fatalf("program has not enoght statements. got=%d", ps)
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+		if !ok {
+			t.Fatalf("program.Statements[0] is not an *ast.NumberExpression. got=%T", stmt)
+		}
+
+		prefix, ok := stmt.Expression.(*ast.PrefixExpression)
+
+		if !ok {
+
+		}
+
+	}
 
 }

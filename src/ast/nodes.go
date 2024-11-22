@@ -90,7 +90,29 @@ type IntegerLiteral struct {
 	Value int64
 }
 
-func (s *IntegerLiteral) TokenLiteral() string { return s.Token.Literal }
 func (s *IntegerLiteral) expressionNode()      {}
+func (s *IntegerLiteral) TokenLiteral() string { return s.Token.Literal }
+func (s *IntegerLiteral) String() string       { return s.TokenLiteral() }
 
-func (s *IntegerLiteral) String() string { return s.TokenLiteral() }
+type PrefixExpression struct {
+	Token token.Token
+	Right Expression
+}
+
+func (s *PrefixExpression) expressionNode()  {}
+func (s *PrefixExpression) Operator() string { return s.Token.Literal }
+
+func (s *PrefixExpression) String() string {
+	var sb strings.Builder
+
+	sb.WriteByte('(')
+	sb.WriteString(s.Operator())
+	sb.WriteString(s.Right.String())
+	sb.WriteByte(')')
+
+	return sb.String()
+}
+
+func (s *PrefixExpression) TokenLiteral() string {
+	return s.String()
+}
