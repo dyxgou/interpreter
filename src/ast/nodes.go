@@ -90,29 +90,54 @@ type IntegerLiteral struct {
 	Value int64
 }
 
-func (s *IntegerLiteral) expressionNode()      {}
-func (s *IntegerLiteral) TokenLiteral() string { return s.Token.Literal }
-func (s *IntegerLiteral) String() string       { return s.TokenLiteral() }
+func (e *IntegerLiteral) expressionNode()      {}
+func (e *IntegerLiteral) TokenLiteral() string { return e.Token.Literal }
+func (e *IntegerLiteral) String() string       { return e.TokenLiteral() }
 
 type PrefixExpression struct {
 	Token token.Token
 	Right Expression
 }
 
-func (s *PrefixExpression) expressionNode()  {}
-func (s *PrefixExpression) Operator() string { return s.Token.Literal }
+func (e *PrefixExpression) expressionNode()      {}
+func (e *PrefixExpression) TokenLiteral() string { return e.Token.Literal }
+func (e *PrefixExpression) Operator() string     { return e.TokenLiteral() }
 
-func (s *PrefixExpression) String() string {
+func (e *PrefixExpression) String() string {
 	var sb strings.Builder
 
 	sb.WriteByte('(')
-	sb.WriteString(s.Operator())
-	sb.WriteString(s.Right.String())
+	sb.WriteString(e.Operator())
+	sb.WriteString(e.Right.String())
 	sb.WriteByte(')')
 
 	return sb.String()
 }
 
-func (s *PrefixExpression) TokenLiteral() string {
-	return s.String()
+type InfixExpression struct {
+	Token token.Token
+	Left  Expression
+	Right Expression
+}
+
+func (e *InfixExpression) expressionNode()      {}
+func (e *InfixExpression) TokenLiteral() string { return e.Token.Literal }
+func (e *InfixExpression) Operator() string     { return e.TokenLiteral() }
+
+func (e *InfixExpression) String() string {
+	var sb strings.Builder
+
+	sb.WriteByte('(')
+	if e.Left != nil {
+		sb.WriteString(e.Left.String())
+		sb.WriteString(e.Operator())
+	}
+
+	if e.Right != nil {
+		sb.WriteString(e.Right.String())
+	}
+
+	sb.WriteByte(')')
+
+	return sb.String()
 }
