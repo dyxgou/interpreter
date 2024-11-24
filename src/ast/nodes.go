@@ -130,7 +130,9 @@ func (e *InfixExpression) String() string {
 	sb.WriteByte('(')
 	if e.Left != nil {
 		sb.WriteString(e.Left.String())
+		sb.WriteByte(' ')
 		sb.WriteString(e.Operator())
+		sb.WriteByte(' ')
 	}
 
 	if e.Right != nil {
@@ -141,3 +143,12 @@ func (e *InfixExpression) String() string {
 
 	return sb.String()
 }
+
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (e *Boolean) expressionNode()      {}
+func (e *Boolean) TokenLiteral() string { return e.Token.Literal }
+func (e *Boolean) String() string       { return e.TokenLiteral() }
