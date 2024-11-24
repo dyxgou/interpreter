@@ -91,6 +91,46 @@ func (p *Parser) registerInfix(k token.TokenKind, fn infixParseFn) {
 	p.infixParseFns[k] = fn
 }
 
+func (p *Parser) readTokenIs(k token.TokenKind) bool {
+	if p.readToken.Kind == k {
+		return true
+	}
+
+	return false
+}
+
+func (p *Parser) curTokenIs(k token.TokenKind) bool {
+	if p.curToken.Kind == k {
+		return true
+	}
+
+	return false
+}
+
+func (p *Parser) expectRead(k token.TokenKind) bool {
+	if p.readTokenIs(k) {
+		p.nextToken()
+		return true
+	}
+
+	return false
+}
+
+func (p *Parser) notExpectedTokenErr(expected string) {
+	err := fmt.Errorf("expected next token to be '%s' got='%s'", expected, p.readToken.Literal)
+
+	p.errors = append(p.errors, err)
+}
+
+func (p *Parser) notPrefixParseFnError(t token.TokenKind) {
+	err := fmt.Errorf("no prefix parse function for %d found", t)
+	p.errors = append(p.errors, err)
+}
+
+func (p *Parser) Errors() []error {
+	return p.errors
+}
+
 func (p *Parser) readPrencedence() Precendence {
 	if pr, ok := precendences[p.readToken.Kind]; ok {
 		return pr
@@ -263,44 +303,4 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	}
 
 	return retStmt
-}
-
-func (p *Parser) readTokenIs(k token.TokenKind) bool {
-	if p.readToken.Kind == k {
-		return true
-	}
-
-	return false
-}
-
-func (p *Parser) curTokenIs(k token.TokenKind) bool {
-	if p.curToken.Kind == k {
-		return true
-	}
-
-	return false
-}
-
-func (p *Parser) expectRead(k token.TokenKind) bool {
-	if p.readTokenIs(k) {
-		p.nextToken()
-		return true
-	}
-
-	return false
-}
-
-func (p *Parser) notExpectedTokenErr(expected string) {
-	err := fmt.Errorf("expected next token to be '%s' got='%s'", expected, p.readToken.Literal)
-
-	p.errors = append(p.errors, err)
-}
-
-func (p *Parser) notPrefixParseFnError(t token.TokenKind) {
-	err := fmt.Errorf("no prefix parse function for %d found", t)
-	p.errors = append(p.errors, err)
-}
-
-func (p *Parser) Errors() []error {
-	return p.errors
 }
