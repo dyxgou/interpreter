@@ -61,6 +61,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.NOT, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(token.TRUE, p.parseBooleanExpresion)
+	p.registerPrefix(token.FALSE, p.parseBooleanExpresion)
+	p.registerPrefix(token.LPAREN, p.parseGroupingExpression)
 
 	// Infix Funcs
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -303,4 +306,23 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	}
 
 	return retStmt
+}
+
+func (p *Parser) parseBooleanExpresion() ast.Expression {
+	// As this function is only going to be called when the curToken.Kind is true or false
+	// We can use this function to dont make the conversion manually
+	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
+}
+
+func (p *Parser) parseGroupingExpression() ast.Expression {
+	p.nextToken()
+
+	exp := p.parseExpression(LOWEST)
+
+	if !p.readTokenIs(token.RPAREN) {
+		return nil
+	}
+
+	p.nextToken()
+	return exp
 }
