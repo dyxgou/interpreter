@@ -139,6 +139,10 @@ func (p *Parser) Errors() []error {
 	return p.errors
 }
 
+func (p *Parser) ErrorsLen() int {
+	return len(p.errors)
+}
+
 func (p *Parser) readPrencedence() Precendence {
 	if pr, ok := precendences[p.readToken.Kind]; ok {
 		return pr
@@ -264,17 +268,15 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	letStmt.Name = &ast.Identifier{Token: p.curToken}
 
 	if !p.expectRead(token.ASSIGN) {
-		p.notExpectedTokenErr("=", p.curToken.Literal)
+		p.notExpectedTokenErr("=", p.readToken.Literal)
 		return nil
 	}
 
-	i := 0
-	const scope int = 100
+	p.nextToken()
+	letStmt.Value = p.parseExpression(LOWEST)
 
-	// TODO: Parse the expression
-	for p.curToken.Kind != token.SEMI && i < scope {
+	if p.readTokenIs(token.SEMI) {
 		p.nextToken()
-		i++
 	}
 
 	return letStmt
@@ -301,13 +303,11 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	retStmt := &ast.ReturnStatement{Token: p.curToken}
 
-	i := 0
-	const scope int = 100
+	p.nextToken()
+	retStmt.Value = p.parseExpression(LOWEST)
 
-	// TODO: Parse the expression
-	for p.curToken.Kind != token.SEMI && i < scope {
+	if p.readTokenIs(token.SEMI) {
 		p.nextToken()
-		i++
 	}
 
 	return retStmt

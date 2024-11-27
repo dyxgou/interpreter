@@ -8,44 +8,35 @@ import (
 )
 
 func TestParseStatements(t *testing.T) {
-	input := `let five = 5;
-  let ten = 10;
-  let foobar = 1221;`
-
-	l := lexer.New(input)
-
-	p := New(l)
-
-	program := p.ParseProgram()
-
-	if program == nil {
-		t.Fatal("Program returned nil")
-	}
-
-	checkParserErrors(t, p)
-
-	if len(program.Statements) != 3 {
-		t.Fatal("The program doesnt have the exact staments")
-	}
-
 	tests := []struct {
+		input              string
 		expectedIdentifier string
+		expectedValue      any
 	}{
-		{"five"},
-		{"ten"},
-		{"foobar"},
+		{"let five = 5;", "five", 5},
+		{"let ten = 10;", "ten", 10},
+		{"let theBest = 5614;", "theBest", 5614},
 	}
 
-	for i, stmt := range program.Statements {
-		tt := tests[i]
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
 
-		if !testLetStament(t, stmt, tt.expectedIdentifier) {
-			t.Fail()
+		program := p.ParseProgram()
+
+		checkParserErrors(t, p)
+
+		if ps := len(program.Statements); ps != 1 {
+			t.Fatalf("program.Statements expected=1 statements. got=%d", ps)
+		}
+
+		if !testLetStament(t, program.Statements[0], tt.expectedIdentifier, tt.expectedValue) {
+			return
 		}
 	}
 }
 
-func testLetStament(t *testing.T, s ast.Statement, name string) bool {
+func testLetStament(t *testing.T, s ast.Statement, name string, value any) bool {
 	if s.TokenLiteral() != "let" {
 		t.Errorf("s.TokenLiteral not 'let'. got=%q", s.TokenLiteral())
 		return false
@@ -65,6 +56,10 @@ func testLetStament(t *testing.T, s ast.Statement, name string) bool {
 
 	if letStmt.Name.TokenLiteral() != name {
 		t.Errorf("s.Name not '%s' got='%s'", name, letStmt.Name.Value())
+		return false
+	}
+
+	if !testLiteralExpression(t, letStmt.Value, value) {
 		return false
 	}
 
@@ -360,6 +355,18 @@ func TestOperatorPrecendence(t *testing.T) {
 		{
 			"!(true == true)",
 			"(!(true == true))",
+		},
+		{
+			"a + add(b * c) + d",
+			"((a + add((b * c))) + d)",
+		},
+		{
+			"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+			"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+		},
+		{
+			"add(a + b + c * d / f + g)",
+			"add((((a + b) + ((c * d) / f)) + g))",
 		},
 	}
 
