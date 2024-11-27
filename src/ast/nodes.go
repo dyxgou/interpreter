@@ -246,7 +246,7 @@ func (e *CallExpression) String() string {
 
 	sb.WriteByte('(')
 	for i, arg := range e.Arguments {
-		if i == 0 && i < len(e.Arguments) {
+		if i > 0 && i < len(e.Arguments) {
 			sb.WriteString(", ")
 		}
 
