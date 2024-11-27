@@ -211,6 +211,7 @@ func (e *FunctionLiteral) TokenLiteral() string { return e.Token.Literal }
 func (e *FunctionLiteral) String() string {
 	var sb strings.Builder
 
+	sb.WriteString("fn")
 	sb.WriteByte('(')
 	for i, p := range e.Params {
 		if i > 0 && i < len(e.Params) {

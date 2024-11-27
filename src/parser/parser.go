@@ -65,6 +65,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FALSE, p.parseBooleanExpresion)
 	p.registerPrefix(token.LPAREN, p.parseGroupingExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
+	p.registerPrefix(token.FUNCTION, p.parseFunctionExpression)
 
 	// Infix Funcs
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -389,36 +390,46 @@ func (p *Parser) parseFunctionExpression() ast.Expression {
 	funcExp := &ast.FunctionLiteral{Token: p.curToken}
 
 	if !p.expectRead(token.LPAREN) {
-		p.notExpectedTokenErr("(", p.curToken.Literal)
+		p.notExpectedTokenErr("(", p.readToken.Literal)
 		return nil
 	}
+
+	funcExp.Params = p.parseFunctionParams()
+
+	if !p.expectRead(token.LBRACE) {
+		p.notExpectedTokenErr("{", p.curToken.Literal)
+		return nil
+	}
+
+	funcExp.Body = p.parseBlockStatement()
 
 	return funcExp
 }
 
-func (p *Parser) parseFunctionIdentifiers() []*ast.Identifier {
-	idents := make([]*ast.Identifier, 0, 20)
+func (p *Parser) parseFunctionParams() []*ast.Identifier {
+	params := make([]*ast.Identifier, 0, 20)
 
-	if p.expectRead(token.RPAREN) {
+	if p.readTokenIs(token.RPAREN) {
 		p.nextToken()
-		return idents
+		return params
 	}
 
 	p.nextToken()
 	ident := &ast.Identifier{Token: p.curToken}
-	idents = append(idents, ident)
+	params = append(params, ident)
 
 	for p.readTokenIs(token.COMMA) {
 		p.nextToken()
 		p.nextToken()
+
 		ident := &ast.Identifier{Token: p.curToken}
-		idents = append(idents, ident)
+		params = append(params, ident)
 	}
 
 	if !p.expectRead(token.RPAREN) {
-		p.notExpectedTokenErr(")", p.curToken.Literal)
+		p.notExpectedTokenErr(")", p.readToken.Literal)
 		return nil
 	}
 
-	return idents
+	return params
 }
