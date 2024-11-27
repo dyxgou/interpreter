@@ -119,8 +119,8 @@ func (p *Parser) expectRead(k token.TokenKind) bool {
 	return false
 }
 
-func (p *Parser) notExpectedTokenErr(expected string) {
-	err := fmt.Errorf("expected next token to be '%s' got='%s'", expected, p.readToken.Literal)
+func (p *Parser) notExpectedTokenErr(expected string, got string) {
+	err := fmt.Errorf("expected next token to be '%s' got='%s'", expected, got)
 
 	p.errors = append(p.errors, err)
 }
@@ -252,14 +252,14 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	letStmt := &ast.LetStatement{Token: p.curToken}
 
 	if !p.expectRead(token.IDENT) {
-		p.notExpectedTokenErr("variable_name")
+		p.notExpectedTokenErr("variable_name", p.curToken.Literal)
 		return nil
 	}
 
 	letStmt.Name = &ast.Identifier{Token: p.curToken}
 
 	if !p.expectRead(token.ASSIGN) {
-		p.notExpectedTokenErr("=")
+		p.notExpectedTokenErr("=", p.curToken.Literal)
 		return nil
 	}
 
