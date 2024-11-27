@@ -229,3 +229,30 @@ func (e *FunctionLiteral) String() string {
 
 	return sb.String()
 }
+
+type CallExpression struct {
+	Token     token.Token
+	Function  Expression
+	Arguments []Expression
+}
+
+func (e *CallExpression) expressionNode()      {}
+func (e *CallExpression) TokenLiteral() string { return e.Token.Literal }
+
+func (e *CallExpression) String() string {
+	var sb strings.Builder
+
+	sb.WriteString(e.Function.String())
+
+	sb.WriteByte('(')
+	for i, arg := range e.Arguments {
+		if i == 0 && i < len(e.Arguments) {
+			sb.WriteString(", ")
+		}
+
+		sb.WriteString(arg.String())
+	}
+	sb.WriteByte(')')
+
+	return sb.String()
+}

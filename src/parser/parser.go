@@ -35,6 +35,7 @@ var precendences = map[token.TokenKind]Precendence{
 	token.MINUS:          SUM,
 	token.DIVISION:       PRODUCT,
 	token.MULTIPLICATION: PRODUCT,
+	token.LPAREN:         CALL,
 }
 
 type Parser struct {
@@ -76,6 +77,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOT_EQUAL, p.parseInfixExpression)
 	p.registerInfix(token.LESS, p.parseInfixExpression)
 	p.registerInfix(token.GREATER, p.parseInfixExpression)
+	p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -432,4 +434,41 @@ func (p *Parser) parseFunctionParams() []*ast.Identifier {
 	}
 
 	return params
+}
+
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	callExp := &ast.CallExpression{
+		Token:    p.curToken,
+		Function: function,
+	}
+
+	callExp.Arguments = p.parseCallArguments()
+
+	return callExp
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	args := make([]ast.Expression, 0, 20)
+
+	if p.readTokenIs(token.RPAREN) {
+		p.nextToken()
+		return args
+	}
+
+	p.nextToken()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.readTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectRead(token.RPAREN) {
+		p.notExpectedTokenErr(")", p.readToken.Literal)
+		return nil
+	}
+
+	return args
 }
