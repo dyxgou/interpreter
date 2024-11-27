@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"gihub.com/dyxgou/parser/src/lexer"
-	"gihub.com/dyxgou/parser/src/token"
+	"gihub.com/dyxgou/parser/src/parser"
 )
 
 const PROMPT = ">> "
@@ -25,9 +25,23 @@ func Start(in io.Reader, out io.Writer) {
 		text := scanner.Text()
 
 		l := lexer.New(text)
+		p := parser.New(l)
 
-		for tok := l.NextToken(); tok.Kind != token.EOF; tok = l.NextToken() {
-			fmt.Printf("tok: %v\n", tok)
+		program := p.ParseProgram()
+
+		if p.ErrorsLen() != 0 {
+			printParserErrors(out, p.Errors())
 		}
+
+		io.WriteString(out, program.String())
+		io.WriteString(out, "\n")
+	}
+}
+
+func printParserErrors(out io.Writer, errors []error) {
+	for _, err := range errors {
+		io.WriteString(out, "   ")
+		io.WriteString(out, err.Error())
+		io.WriteString(out, "\n")
 	}
 }
