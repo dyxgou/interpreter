@@ -64,6 +64,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.TRUE, p.parseBooleanExpresion)
 	p.registerPrefix(token.FALSE, p.parseBooleanExpresion)
 	p.registerPrefix(token.LPAREN, p.parseGroupingExpression)
+	p.registerPrefix(token.IF, p.parseIfExpression)
 
 	// Infix Funcs
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -110,6 +111,7 @@ func (p *Parser) curTokenIs(k token.TokenKind) bool {
 	return false
 }
 
+// returns true and advance the token if the expected token is equal to the current token, if not just returns false and dont advance the token
 func (p *Parser) expectRead(k token.TokenKind) bool {
 	if p.readTokenIs(k) {
 		p.nextToken()
@@ -325,4 +327,60 @@ func (p *Parser) parseGroupingExpression() ast.Expression {
 
 	p.nextToken()
 	return exp
+}
+
+func (p *Parser) parseIfExpression() ast.Expression {
+	ifExp := &ast.IfExpression{Token: p.curToken}
+
+	if !p.expectRead(token.LPAREN) {
+		p.notExpectedTokenErr("(", p.readToken.Literal)
+		return nil
+	}
+
+	p.nextToken() // curToken = token.LPAREN
+	ifExp.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectRead(token.RPAREN) {
+		p.notExpectedTokenErr(")", p.readToken.Literal)
+		return nil
+	}
+
+	if !p.expectRead(token.LBRACE) {
+		p.notExpectedTokenErr("{", p.readToken.Literal)
+		return nil
+	}
+
+	ifExp.Consequence = p.parseBlockStatement()
+
+	if p.expectRead(token.ELSE) {
+		if !p.expectRead(token.LBRACE) {
+			p.notExpectedTokenErr("{", p.readToken.Literal)
+			return nil
+		}
+
+		ifExp.Alternative = p.parseBlockStatement()
+	}
+
+	return ifExp
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{
+		Token:      p.curToken,
+		Statements: make([]ast.Statement, 0, 20),
+	}
+
+	p.nextToken()
+
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+
+		p.nextToken()
+	}
+
+	return block
 }

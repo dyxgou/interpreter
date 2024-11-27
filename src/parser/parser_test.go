@@ -457,3 +457,66 @@ func TestIfExpression(t *testing.T) {
 		t.Fatalf("exp.Alternative was not nil. got=%T", ifExp.Alternative)
 	}
 }
+
+func TestIfElseExpression(t *testing.T) {
+	input := "if (x > y) { x } else { y }"
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if ps := len(program.Statements); ps != 1 {
+		t.Fatalf("program.Body expected=1 statements. got=%d", ps)
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("stmt is not an *ast.ExpressionStatement. got=%T", stmt)
+	}
+
+	ifExp, ok := stmt.Expression.(*ast.IfExpression)
+
+	if !ok {
+		t.Fatalf("exp is not an *ast.IfExpression. got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, ifExp.Condition, "x", ">", "y") {
+		return
+	}
+
+	if len(ifExp.Consequence.Statements) != 1 {
+		t.Fatalf("consequence expected=1 statements. got=%d", len(ifExp.Consequence.Statements))
+	}
+
+	cons, ok := ifExp.Consequence.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("cons is not an *ast.ExpressionStatement. got=%T", ifExp.Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, cons.Expression, "x") {
+		t.Log("ifExp.Consequence")
+		return
+	}
+
+	if ifExp.Alternative == nil {
+		t.Fatalf("exp.Alternative was nil.")
+	}
+
+	if len(ifExp.Alternative.Statements) != 1 {
+		t.Fatalf("alternative expected=1 statements. got=%d", len(ifExp.Alternative.Statements))
+	}
+
+	alter, ok := ifExp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("alter is not an *ast.ExpressionStatement. got=%T", ifExp.Alternative.Statements[0])
+	}
+
+	if !testIdentifier(t, alter.Expression, "y") {
+		t.Log("ifExp.Alternative")
+		return
+	}
+}
