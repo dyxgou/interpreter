@@ -520,3 +520,49 @@ func TestIfElseExpression(t *testing.T) {
 		return
 	}
 }
+
+func TestFunctionLiteralParsing(t *testing.T) {
+	input := "fn(x , y) {x + y;}"
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+
+	if ps := len(program.Statements); ps != 1 {
+		t.Fatalf("program.Statements expected=1 statements. got=%d", ps)
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("stmt is not *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	funcLit, ok := stmt.Expression.(*ast.FunctionLiteral)
+
+	if !ok {
+		t.Fatalf("exp is not *ast.FunctionLiteral. got=%T", stmt.Expression)
+	}
+
+	if ps := len(funcLit.Params); ps != 2 {
+		t.Fatalf("params expected=2. got=%d", ps)
+	}
+
+	testIdentifier(t, funcLit.Params[0], "x")
+	testIdentifier(t, funcLit.Params[1], "y")
+
+	if bs := len(funcLit.Body.Statements); bs != 1 {
+		t.Fatalf("body expected=1 statements. got=%d", bs)
+	}
+
+	exp, ok := funcLit.Body.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("body.Statements not *ast.ExpressionStatement. got=%T", funcLit.Body.Statements[0])
+	}
+
+	if !testInfixExpression(t, exp.Expression, "x", "+", "y") {
+		return
+	}
+}

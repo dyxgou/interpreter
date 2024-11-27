@@ -199,3 +199,32 @@ func (e *IfExpression) String() string {
 
 	return sb.String()
 }
+
+type FunctionLiteral struct {
+	Token  token.Token
+	Params []*Identifier
+	Body   *BlockStatement
+}
+
+func (e *FunctionLiteral) expressionNode()      {}
+func (e *FunctionLiteral) TokenLiteral() string { return e.Token.Literal }
+func (e *FunctionLiteral) String() string {
+	var sb strings.Builder
+
+	sb.WriteByte('(')
+	for i, p := range e.Params {
+		if i > 0 && i < len(e.Params) {
+			sb.WriteByte(',')
+			sb.WriteByte(' ')
+		}
+
+		sb.WriteString(p.String())
+	}
+	sb.WriteByte(')')
+
+	sb.WriteByte('{')
+	sb.WriteString(e.Body.String())
+	sb.WriteByte('}')
+
+	return sb.String()
+}

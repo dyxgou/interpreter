@@ -384,3 +384,41 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 
 	return block
 }
+
+func (p *Parser) parseFunctionExpression() ast.Expression {
+	funcExp := &ast.FunctionLiteral{Token: p.curToken}
+
+	if !p.expectRead(token.LPAREN) {
+		p.notExpectedTokenErr("(", p.curToken.Literal)
+		return nil
+	}
+
+	return funcExp
+}
+
+func (p *Parser) parseFunctionIdentifiers() []*ast.Identifier {
+	idents := make([]*ast.Identifier, 0, 20)
+
+	if p.expectRead(token.RPAREN) {
+		p.nextToken()
+		return idents
+	}
+
+	p.nextToken()
+	ident := &ast.Identifier{Token: p.curToken}
+	idents = append(idents, ident)
+
+	for p.readTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		ident := &ast.Identifier{Token: p.curToken}
+		idents = append(idents, ident)
+	}
+
+	if !p.expectRead(token.RPAREN) {
+		p.notExpectedTokenErr(")", p.curToken.Literal)
+		return nil
+	}
+
+	return idents
+}
