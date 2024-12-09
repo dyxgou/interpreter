@@ -48,3 +48,12 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 
 	return true
 }
+
+func testNullObject(t *testing.T, obj object.Object) bool {
+	if obj != NULL {
+		t.Errorf("object expected=evaluator.NULL. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	return true
+}

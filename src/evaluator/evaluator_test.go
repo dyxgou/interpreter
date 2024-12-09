@@ -81,4 +81,52 @@ func TestNotOperator(t *testing.T) {
 	}
 }
 
-func TestIfElseExpression(t *testing.T) {}
+func TestIfElseExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{"if(true) { 10 }", 10},
+		{"if(false) { 10 }", nil},
+		{"if(1) { 10 }", 10},
+		{"if(1 < 2) { 10 }", 10},
+		{"if(1 > 2) { 10 }", nil},
+		{"if(1 < 2) { 10 } else { 20 }", 10},
+		{"if(1 > 2) { 10 } else { 20 }", 20},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
+func TestReturnStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{"return 10;", 10},
+		{"return 10; 9;", 10},
+		{"12; return 10; 32;", 10},
+		{"return 2 * 5;", 10},
+		{`if(5 < 10) {
+        if(2 < 10) {
+          return 10;
+        }
+
+        return 20;
+      }`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, 10)
+	}
+}
