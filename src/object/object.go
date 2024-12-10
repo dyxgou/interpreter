@@ -25,7 +25,7 @@ type Integer struct {
 }
 
 func (_ *Integer) Type() ObjectType { return IntegerType }
-func (_ *Integer) String() string   { return "Integer" }
+func (_ *Integer) String() string   { return "INTEGER" }
 func (o *Integer) Inspect() string  { return fmt.Sprintf("%d", o.Value) }
 
 type Boolean struct {
@@ -33,6 +33,7 @@ type Boolean struct {
 }
 
 func (_ *Boolean) Type() ObjectType { return BooleanType }
+func (_ *Boolean) String() string   { return "BOOLEAN" }
 func (o *Boolean) Inspect() string  { return fmt.Sprintf("%t", o.Value) }
 
 type Null struct{}
