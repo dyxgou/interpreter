@@ -3,8 +3,8 @@ package evaluator
 import (
 	"fmt"
 
-	"gihub.com/dyxgou/parser/src/ast"
-	"gihub.com/dyxgou/parser/src/object"
+	"github.com/dyxgou/parser/src/ast"
+	"github.com/dyxgou/parser/src/object"
 )
 
 var (
@@ -27,35 +27,44 @@ const (
 	notEqualOperator     string = "!="
 )
 
-func Eval(node ast.Node) object.Object {
+func Eval(node ast.Node, env *object.Enviroment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
-		return evalProgram(node.Statements)
+		return evalProgram(node.Statements, env)
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression)
+		return Eval(node.Expression, env)
 	case *ast.BlockStatement:
-		return evalStatements(node.Statements)
+		return evalStatements(node.Statements, env)
 	case *ast.IfExpression:
-		return evalIfExpression(node)
+		return evalIfExpression(node, env)
+	case *ast.LetStatement:
+		val := Eval(node.Value, env)
+
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Name.Value(), val)
+	case *ast.Identifier:
+		return evalIdentifier(node, env)
 	case *ast.ReturnStatement:
-		value := Eval(node.Value)
+		value := Eval(node.Value, env)
 		if isError(value) {
 			return value
 		}
 		return &object.ReturnValue{Value: value}
 	case *ast.PrefixExpression:
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalPrefixExpression(node.Operator(), right)
 	case *ast.InfixExpression:
-		left := Eval(node.Left)
+		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
 		}
 
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
@@ -71,11 +80,11 @@ func Eval(node ast.Node) object.Object {
 	return nil
 }
 
-func evalProgram(stmts []ast.Statement) object.Object {
+func evalProgram(stmts []ast.Statement, env *object.Enviroment) object.Object {
 	var result object.Object
 
 	for _, stmt := range stmts {
-		result = Eval(stmt)
+		result = Eval(stmt, env)
 
 		switch result := result.(type) {
 		case *object.ReturnValue:
@@ -88,11 +97,11 @@ func evalProgram(stmts []ast.Statement) object.Object {
 	return result
 }
 
-func evalStatements(stmts []ast.Statement) object.Object {
+func evalStatements(stmts []ast.Statement, env *object.Enviroment) object.Object {
 	var result object.Object
 
 	for _, stmt := range stmts {
-		result = Eval(stmt)
+		result = Eval(stmt, env)
 
 		if result != nil {
 			if result.Type() == object.ReturnType || result.Type() == object.ErrorType {
@@ -216,16 +225,26 @@ func isTruthy(obj object.Object) bool {
 	return true
 }
 
-func evalIfExpression(ie *ast.IfExpression) object.Object {
-	condition := Eval(ie.Condition)
+func evalIfExpression(ie *ast.IfExpression, env *object.Enviroment) object.Object {
+	condition := Eval(ie.Condition, env)
 
 	if isTruthy(condition) {
-		return Eval(ie.Consequence)
+		return Eval(ie.Consequence, env)
 	} else if ie.Alternative != nil {
-		return Eval(ie.Alternative)
+		return Eval(ie.Alternative, env)
 	}
 
 	return NULL
+}
+
+func evalIdentifier(node *ast.Identifier, env *object.Enviroment) object.Object {
+	val, ok := env.Get(node.Value())
+
+	if !ok {
+		return newError("identifier not found: %s", node.Value())
+	}
+
+	return val
 }
 
 func newError(message string, a ...any) *object.Error {

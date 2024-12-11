@@ -3,7 +3,7 @@ package ast
 import (
 	"strings"
 
-	"gihub.com/dyxgou/parser/src/token"
+	"github.com/dyxgou/parser/src/token"
 )
 
 type Identifier struct {

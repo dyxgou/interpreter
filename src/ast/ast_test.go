@@ -3,7 +3,7 @@ package ast
 import (
 	"testing"
 
-	"gihub.com/dyxgou/parser/src/token"
+	"github.com/dyxgou/parser/src/token"
 )
 
 func TestAstString(t *testing.T) {

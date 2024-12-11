@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"io"
 
-	"gihub.com/dyxgou/parser/src/evaluator"
-	"gihub.com/dyxgou/parser/src/lexer"
-	"gihub.com/dyxgou/parser/src/parser"
+	"github.com/dyxgou/parser/src/evaluator"
+	"github.com/dyxgou/parser/src/lexer"
+	"github.com/dyxgou/parser/src/object"
+	"github.com/dyxgou/parser/src/parser"
 )
 
 const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnviroment()
 
 	for {
 		fmt.Print(PROMPT)
@@ -34,7 +36,7 @@ func Start(in io.Reader, out io.Writer) {
 			printParserErrors(out, p.Errors())
 		}
 
-		evaluated := evaluator.Eval(program)
+		evaluated := evaluator.Eval(program, env)
 
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())

@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/user"
 
-	"gihub.com/dyxgou/parser/src/repl"
+	"github.com/dyxgou/parser/src/repl"
 )
 
 func main() {

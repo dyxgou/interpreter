@@ -3,9 +3,9 @@ package evaluator
 import (
 	"testing"
 
-	"gihub.com/dyxgou/parser/src/lexer"
-	"gihub.com/dyxgou/parser/src/object"
-	"gihub.com/dyxgou/parser/src/parser"
+	"github.com/dyxgou/parser/src/lexer"
+	"github.com/dyxgou/parser/src/object"
+	"github.com/dyxgou/parser/src/parser"
 )
 
 func testEval(input string) object.Object {
@@ -13,8 +13,9 @@ func testEval(input string) object.Object {
 	p := parser.New(l)
 
 	program := p.ParseProgram()
+	env := object.NewEnviroment()
 
-	return Eval(program)
+	return Eval(program, env)
 }
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"gihub.com/dyxgou/parser/src/ast"
+	"github.com/dyxgou/parser/src/ast"
 )
 
 func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {

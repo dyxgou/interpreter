@@ -3,7 +3,7 @@ package evaluator
 import (
 	"testing"
 
-	"gihub.com/dyxgou/parser/src/object"
+	"github.com/dyxgou/parser/src/object"
 )
 
 func TestEvalIntegerLiteral(t *testing.T) {
@@ -175,6 +175,7 @@ func TestErrorHandeling(t *testing.T) {
     `,
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
+		{"foobar", "identifier not found: foobar"},
 	}
 
 	for _, tt := range tests {

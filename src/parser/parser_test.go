@@ -3,8 +3,8 @@ package parser
 import (
 	"testing"
 
-	"gihub.com/dyxgou/parser/src/ast"
-	"gihub.com/dyxgou/parser/src/lexer"
+	"github.com/dyxgou/parser/src/ast"
+	"github.com/dyxgou/parser/src/lexer"
 )
 
 func TestParseStatements(t *testing.T) {

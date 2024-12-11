@@ -3,7 +3,7 @@ package lexer
 import (
 	"testing"
 
-	"gihub.com/dyxgou/parser/src/token"
+	"github.com/dyxgou/parser/src/token"
 )
 
 func TestReadPosition(t *testing.T) {
