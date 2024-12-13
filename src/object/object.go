@@ -2,6 +2,9 @@ package object
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/dyxgou/parser/src/ast"
 )
 
 type ObjectType byte
@@ -11,6 +14,7 @@ const (
 	BooleanType
 	NullType
 	ReturnType
+	FunctionType
 	ErrorType
 )
 
@@ -57,3 +61,32 @@ type Error struct {
 func (_ *Error) Type() ObjectType { return ErrorType }
 func (_ *Error) String() string   { return "ERROR" }
 func (o *Error) Inspect() string  { return fmt.Sprintf("ERROR : %s", o.Message) }
+
+type Function struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Enviroment
+}
+
+func (o *Function) Type() ObjectType { return FunctionType }
+func (o *Function) String() string   { return "FUNCTION" }
+func (o *Function) Inspect() string {
+	var sb strings.Builder
+
+	sb.WriteString("fn")
+
+	sb.WriteByte('(')
+	for i, param := range o.Parameters {
+		if i > 0 && i < len(o.Parameters) {
+			sb.WriteString(" ,")
+		}
+
+		sb.WriteString(param.String())
+	}
+	sb.WriteString(") { \n")
+
+	sb.WriteString(o.Body.String())
+	sb.WriteString("\n}")
+
+	return sb.String()
+}
