@@ -44,6 +44,11 @@ func Eval(node ast.Node, env *object.Enviroment) object.Object {
 			return val
 		}
 		env.Set(node.Name.Value(), val)
+	case *ast.FunctionLiteral:
+		params := node.Params
+		body := node.Body
+
+		return &object.Function{Parameters: params, Body: body, Env: env}
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	case *ast.ReturnStatement:
@@ -52,6 +57,21 @@ func Eval(node ast.Node, env *object.Enviroment) object.Object {
 			return value
 		}
 		return &object.ReturnValue{Value: value}
+	case *ast.CallExpression:
+		// node.Function can be an identifier
+		function := Eval(node.Function, env)
+
+		if isError(function) {
+			return function
+		}
+
+		args := evalExpressions(node.Arguments, env)
+
+		if len(args) == 1 && isError(args[0]) {
+			return args[0]
+		}
+
+		return applyFunction(function, args)
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
 		if isError(right) {
@@ -245,6 +265,55 @@ func evalIdentifier(node *ast.Identifier, env *object.Enviroment) object.Object 
 	}
 
 	return val
+}
+
+func evalExpressions(exps []ast.Expression, env *object.Enviroment) []object.Object {
+	result := make([]object.Object, 0, len(exps))
+
+	for _, exp := range exps {
+		evaluated := Eval(exp, env)
+
+		if isError(evaluated) {
+			return []object.Object{evaluated}
+		}
+
+		result = append(result, evaluated)
+	}
+
+	return result
+}
+
+func applyFunction(fn object.Object, args []object.Object) object.Object {
+	function, ok := fn.(*object.Function)
+
+	if !ok {
+		return newError("not a function. got=%q", fn.String())
+	}
+
+	env := extendFunctionEnv(function, args)
+	evaluated := Eval(function.Body, env)
+
+	return unwrapReturnerValue(evaluated)
+}
+
+func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Enviroment {
+	env := object.NewOuterEnviroment(fn.Env)
+
+	for i, param := range fn.Parameters {
+		env.Set(param.Value(), args[i])
+	}
+
+	return env
+}
+
+func unwrapReturnerValue(obj object.Object) object.Object {
+	retObj, ok := obj.(*object.ReturnValue)
+
+	if ok {
+		return retObj.Value
+	}
+
+	return obj
 }
 
 func newError(message string, a ...any) *object.Error {
