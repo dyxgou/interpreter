@@ -1,3 +1,5 @@
-let add = fn(x, y) {
+let sumar = fn(x , y) {
   return x + y;
 }
+
+sumar(123, 32);
