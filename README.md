@@ -10,8 +10,12 @@ $ git clone https://github.com/dyxgou/parser
 ```
 
 2) Compile the project with `make`.
+This will open an REPL for you to insert any command you like
 ```sh
 $ make
 ```
 
-And that it!
+Compile the project and execute any file you want
+```sh
+$ make execute ARGS=/path/to/file
+```
