@@ -93,6 +93,10 @@ func Eval(node ast.Node, env *object.Enviroment) object.Object {
 		return &object.Integer{
 			Value: node.Value,
 		}
+	case *ast.StringLiteral:
+		return &object.String{
+			Value: node.Value(),
+		}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
 	}
@@ -180,11 +184,15 @@ func evalInfixExpression(operator string, right, left object.Object) object.Obje
 		return NULL
 	}
 
-	switch {
-	case right.Type() != left.Type():
+	if right.Type() != left.Type() {
 		return newError("type mismatch: %s %s %s", left.String(), operator, right.String())
-	case right.Type() == object.IntegerType && left.Type() == object.IntegerType:
+	}
+
+	switch {
+	case right.Type() == object.IntegerType:
 		return evalIntegerInfixExpression(operator, right, left)
+	case right.Type() == object.StringType && operator == plusOperator:
+		return evalStringInfixExpression(right, left)
 	case operator == equalOperator:
 		return nativeBoolToBooleanObject(left == right)
 	case operator == notEqualOperator:
@@ -230,6 +238,13 @@ func evalIntegerInfixExpression(operator string, right, left object.Object) obje
 	}
 
 	return NULL
+}
+
+func evalStringInfixExpression(right, left object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+
+	return &object.String{Value: leftVal + rightVal}
 }
 
 func isTruthy(obj object.Object) bool {

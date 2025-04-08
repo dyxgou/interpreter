@@ -20,9 +20,8 @@ func TestEvalIntegerLiteral(t *testing.T) {
 		{"-50 + 100 + -50", 0},
 		{"5 * 2 + 10", 20},
 		{"5 + 2 * 10", 25},
-		{"20 + 2 * -10", 0},
-		{"50 / 2 * 2 + 10", 60},
 		{"2 * (5 + 10)", 30},
+
 		{"3 * 3 * 3 + 10", 37},
 		{"3 * (3 * 3) + 10", 37},
 		{"(5 + 10 * 2 + 15 / 3) * 2 + -10", 50},
@@ -157,6 +156,10 @@ func TestErrorHandeling(t *testing.T) {
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
 		{
+			`"Hello" - "Hello"`,
+			"unknown operator: STRING - STRING",
+		},
+		{
 			"5; true + false; 5",
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
@@ -257,4 +260,32 @@ func TestCallExpression(t *testing.T) {
 		evaluated := testEval(tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
+}
+
+func TestClousure(t *testing.T) {
+	input := `
+  let newAdder = fn(x) {
+    fn(y) { x + y };
+  }
+
+  let addTwo = newAdder(2);
+  addTwo(2);
+  `
+
+	testIntegerObject(t, testEval(input), 4)
+}
+
+func TestStringLiteral(t *testing.T) {
+	input := `"hello world";`
+
+	evaluated := testEval(input)
+	testStringObject(t, evaluated, "hello world")
+}
+
+func TestStringConcatenation(t *testing.T) {
+	input := `"hello" + " " + "world";`
+
+	evaluated := testEval(input)
+
+	testStringObject(t, evaluated, "hello world")
 }

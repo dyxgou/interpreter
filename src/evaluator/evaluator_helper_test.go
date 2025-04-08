@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"log/slog"
 	"testing"
 
 	"github.com/dyxgou/parser/src/lexer"
@@ -11,6 +12,10 @@ import (
 func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
+
+	if p.ErrorsLen() != 0 {
+		slog.Error("parser had errors")
+	}
 
 	program := p.ParseProgram()
 	env := object.NewEnviroment()
@@ -44,6 +49,27 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 
 	if boolObj.Value != expected {
 		t.Errorf("boolObj valued expected=%t. got=%t", expected, boolObj.Value)
+		return false
+	}
+
+	return true
+}
+
+func testStringObject(t *testing.T, obj object.Object, expected string) bool {
+	strObj, ok := obj.(*object.String)
+
+	if !ok {
+		if err, ok := obj.(*object.Error); ok {
+			t.Errorf("error evaluating. msg=%q", err.Message)
+			return false
+		}
+
+		t.Errorf("obj expected=*object.String. got=%T", obj)
+		return false
+	}
+
+	if strObj.Value != expected {
+		t.Errorf("strObj valued expected=%q. got=%q", expected, strObj.Value)
 		return false
 	}
 

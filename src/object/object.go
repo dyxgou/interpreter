@@ -11,6 +11,7 @@ type ObjectType byte
 
 const (
 	IntegerType ObjectType = iota
+	StringType
 	BooleanType
 	NullType
 	ReturnType
@@ -31,6 +32,14 @@ type Integer struct {
 func (_ *Integer) Type() ObjectType { return IntegerType }
 func (_ *Integer) String() string   { return "INTEGER" }
 func (o *Integer) Inspect() string  { return fmt.Sprintf("%d", o.Value) }
+
+type String struct {
+	Value string
+}
+
+func (_ *String) Type() ObjectType { return StringType }
+func (_ *String) String() string   { return "STRING" }
+func (o *String) Inspect() string  { return o.Value }
 
 type Boolean struct {
 	Value bool
