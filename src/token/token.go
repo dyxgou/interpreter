@@ -8,6 +8,7 @@ const (
 
 	// Identifies + literals
 	IDENT
+	STRING
 	INT
 
 	// Operators
@@ -30,7 +31,6 @@ const (
 	RPAREN
 	LBRACE
 	RBRACE
-	QOUTE
 
 	// Keywords
 	FUNCTION
