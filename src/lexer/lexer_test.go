@@ -31,6 +31,9 @@ if (7 < 10) {
 } else {
   return false;
 }
+
+"foobar"
+"foo bar"
 `
 	tests := []struct {
 		expectedKind    token.TokenKind
@@ -102,6 +105,8 @@ if (7 < 10) {
 		{token.FALSE, "false"},
 		{token.SEMI, ";"},
 		{token.RBRACE, "}"},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
 		{token.EOF, ""},
 	}
 
@@ -155,6 +160,33 @@ func TestDoubleToken(t *testing.T) {
 		if tok.Literal != tt.expectedLiteral {
 			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
 				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
+func TestTokenizeString(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{input: `"foobar";`, expected: "foobar"},
+		{input: `"foo bar";`, expected: "foo bar"},
+		{input: `"foo\tbar";`, expected: "foo\tbar"},
+		{input: `"foo\t\tbar";`, expected: "foo\t\tbar"},
+		{input: `"foo\nbar";`, expected: "foo\nbar"},
+		{input: `"foo\n\nbar";`, expected: "foo\n\nbar"},
+		{input: `"hello \"world\"";`, expected: "hello \"world\""},
+	}
+
+	for _, tt := range tests {
+		l := New(tt.input)
+
+		tok := l.NextToken()
+		t.Log("token literal", "lit", tok.Literal)
+
+		if tok.Literal != tt.expected {
+			t.Errorf("tok Literal expected=%q. got=%q", tt.expected, tok.Literal)
+			return
 		}
 	}
 }

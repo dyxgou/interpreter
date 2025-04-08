@@ -94,6 +94,15 @@ func (e *IntegerLiteral) expressionNode()      {}
 func (e *IntegerLiteral) TokenLiteral() string { return e.Token.Literal }
 func (e *IntegerLiteral) String() string       { return e.TokenLiteral() }
 
+type StringLiteral struct {
+	Token token.Token
+}
+
+func (s *StringLiteral) expressionNode()      {}
+func (s *StringLiteral) TokenLiteral() string { return s.Token.Literal }
+func (s *StringLiteral) String() string       { return s.TokenLiteral() }
+func (s *StringLiteral) Value() string        { return s.Token.Literal }
+
 type PrefixExpression struct {
 	Token token.Token
 	Right Expression

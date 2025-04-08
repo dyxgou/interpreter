@@ -1,10 +1,13 @@
 package lexer
 
 import (
+	"log/slog"
 	"strings"
 
 	"github.com/dyxgou/parser/src/token"
 )
+
+const backSlash = '\\'
 
 type Lexer struct {
 	input        string
@@ -47,6 +50,7 @@ func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' || l.ch == '\n' {
 		l.readChar()
 	}
+
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -99,7 +103,8 @@ func (l *Lexer) NextToken() token.Token {
 	case '>':
 		t = token.New(token.GREATER, string(l.ch))
 	case '"':
-		t = token.New(token.QOUTE, string(l.ch))
+		s, k := l.readString()
+		t = token.New(k, s)
 	case '!':
 		if ch := l.peekChar(); ch == '=' {
 			t = token.New(token.NOT_EQUAL, getCompositeString(l.ch, ch))
@@ -140,6 +145,34 @@ func (l *Lexer) peekChar() byte {
 	}
 
 	return l.input[l.readPosition]
+}
+
+func (l *Lexer) readString() (string, token.TokenKind) {
+	var sb strings.Builder
+
+	for {
+		l.readChar()
+
+		if l.ch == backSlash {
+			l.readChar()
+			sym, err := getSymbol(l.ch)
+			if err != nil {
+				slog.Warn("tokenizing string", "warn", err)
+				return "", token.ILLEGAL
+			}
+
+			sb.WriteByte(sym)
+			continue
+		}
+
+		if l.ch == '"' || l.ch == byte(token.EOF) {
+			break
+		}
+
+		sb.WriteByte(l.ch)
+	}
+
+	return sb.String(), token.STRING
 }
 
 func getCompositeString(b ...byte) string {
