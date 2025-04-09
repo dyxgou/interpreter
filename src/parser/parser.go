@@ -320,8 +320,6 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 }
 
 func (p *Parser) parseBooleanExpresion() ast.Expression {
-	// As this function is only going to be called when the curToken.Kind is true or false
-	// We can use this function to dont make the conversion manually
 	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
 }
 
