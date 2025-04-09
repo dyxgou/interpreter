@@ -127,7 +127,6 @@ func (p *Parser) expectRead(k token.TokenKind) bool {
 }
 
 func (p *Parser) notExpectedTokenErr(expected string, got string) {
-	err := fmt.Errorf("expected next token to be '%s' got='%s'", expected, got)
 	err := fmt.Errorf("expected next token to be %q got=%q", expected, got)
 
 	p.errors = append(p.errors, err)
@@ -455,7 +454,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 		Function: function,
 	}
 
-	callExp.Arguments = p.parseCallArguments()
+	callExp.Arguments = p.parseExpressionList(")", token.RPAREN)
 
 	return callExp
 }
