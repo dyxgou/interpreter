@@ -696,3 +696,24 @@ func TestParseStringLiteral(t *testing.T) {
 		t.Errorf("literal.Value not %q. got=%q", "hello world", literal.Value())
 	}
 }
+
+func TestParseArrayLiteral(t *testing.T) {
+	input := `[1, 2, 3, 4, 5, 6]`
+
+	p := New(lexer.New(input))
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	array, ok := stmt.Expression.(*ast.ArrayLiteral)
+
+	if !ok {
+		t.Fatalf("exp not ast.ArrayLiteral. got=%T", stmt.Expression)
+	}
+
+	if len(array.Elements) != 6 {
+		t.Fatalf("len(array.Elements) not 3. got=%d", len(array.Elements))
+	}
+
+	testIntegerLiteral(t, array.Elements[0], 1)
+}

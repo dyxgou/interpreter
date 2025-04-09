@@ -265,3 +265,27 @@ func (e *CallExpression) String() string {
 
 	return sb.String()
 }
+
+type ArrayLiteral struct {
+	Token    token.Token // token [
+	Elements []Expression
+}
+
+func (a *ArrayLiteral) expressionNode()      {}
+func (a *ArrayLiteral) TokenLiteral() string { return a.Token.Literal }
+func (a *ArrayLiteral) String() string {
+	var sb strings.Builder
+
+	sb.WriteByte('[')
+	for i, elem := range a.Elements {
+		if i != 0 && i != len(a.Elements)-1 {
+			sb.WriteString(", ")
+		}
+
+		sb.WriteString(elem.String())
+	}
+
+	sb.WriteByte(']')
+
+	return sb.String()
+}
