@@ -273,6 +273,10 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Enviroment) object.Objec
 }
 
 func evalIdentifier(node *ast.Identifier, env *object.Enviroment) object.Object {
+	if bi, ok := builtins[node.Value()]; ok {
+		return bi
+	}
+
 	val, ok := env.Get(node.Value())
 
 	if !ok {
@@ -299,16 +303,17 @@ func evalExpressions(exps []ast.Expression, env *object.Enviroment) []object.Obj
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
+	switch fn := fn.(type) {
+	case *object.Function:
+		env := extendFunctionEnv(fn, args)
+		evaluated := Eval(fn.Body, env)
 
-	if !ok {
-		return newError("not a function. got=%q", fn.String())
+		return unwrapReturnerValue(evaluated)
+	case *object.BuiltIn:
+		return fn.Fn(args...)
 	}
 
-	env := extendFunctionEnv(function, args)
-	evaluated := Eval(function.Body, env)
-
-	return unwrapReturnerValue(evaluated)
+	return newError("not a function. got=%q", fn.String())
 }
 
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Enviroment {

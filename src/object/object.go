@@ -16,6 +16,7 @@ const (
 	NullType
 	ReturnType
 	FunctionType
+	BuiltInType
 	ErrorType
 )
 
@@ -24,6 +25,16 @@ type Object interface {
 	String() string
 	Inspect() string
 }
+
+type BuiltInFunction func(args ...Object) Object
+
+type BuiltIn struct {
+	Fn BuiltInFunction
+}
+
+func (_ *BuiltIn) Type() ObjectType { return BuiltInType }
+func (_ *BuiltIn) Inspect() string  { return "built in function" }
+func (_ *BuiltIn) String() string   { return "built in function" }
 
 type Integer struct {
 	Value int64
