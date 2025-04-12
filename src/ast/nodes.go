@@ -278,7 +278,7 @@ func (a *ArrayLiteral) String() string {
 
 	sb.WriteByte('[')
 	for i, elem := range a.Elements {
-		if i != 0 && i != len(a.Elements)-1 {
+		if i != 0 && i != len(a.Elements) {
 			sb.WriteString(", ")
 		}
 
