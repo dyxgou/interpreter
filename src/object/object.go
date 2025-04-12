@@ -97,3 +97,25 @@ func (o *Function) String() string {
 
 	return sb.String()
 }
+
+type Array struct {
+	Elements []Object
+}
+
+func (*Array) Type() ObjectType      { return ArrayType }
+func (*Array) Inspect() ObjectString { return ArrayStr }
+func (a *Array) String() string {
+	var sb strings.Builder
+
+	sb.WriteByte('[')
+	for i, elem := range a.Elements {
+		if i > 0 && i < len(a.Elements) {
+			sb.WriteString(", ")
+		}
+
+		sb.WriteString(elem.String())
+	}
+	sb.WriteByte(']')
+
+	return sb.String()
+}

@@ -289,3 +289,22 @@ func TestStringConcatenation(t *testing.T) {
 
 	testStringObject(t, evaluated, "hello world")
 }
+
+func TestArrayLiteral(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3]"
+
+	evaluated := testEval(input)
+	array, ok := evaluated.(*object.Array)
+
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if n := len(array.Elements); n != 3 {
+		t.Fatalf("object expected=3 elements. got=%d", n)
+	}
+
+	testIntegerObject(t, array.Elements[0], 1)
+	testIntegerObject(t, array.Elements[1], 4)
+	testIntegerObject(t, array.Elements[2], 6)
+}
