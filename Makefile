@@ -6,7 +6,7 @@ execute: build_execute
 
 
 build_execute:
-	@ go build -o ./bin/executer ./cmd/executer/execute.go
+	@ go build -o ./bin/executer ./cmd/executer/main.go
 
 
 build:
