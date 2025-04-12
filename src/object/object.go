@@ -7,22 +7,9 @@ import (
 	"github.com/dyxgou/parser/src/ast"
 )
 
-type ObjectType byte
-
-const (
-	IntegerType ObjectType = iota
-	StringType
-	BooleanType
-	NullType
-	ReturnType
-	FunctionType
-	BuiltInType
-	ErrorType
-)
-
 type Object interface {
 	Type() ObjectType
-	String() string
+	String() ObjectString
 	Inspect() string
 }
 
@@ -32,55 +19,55 @@ type BuiltIn struct {
 	Fn BuiltInFunction
 }
 
-func (_ *BuiltIn) Type() ObjectType { return BuiltInType }
-func (_ *BuiltIn) Inspect() string  { return "built in function" }
-func (_ *BuiltIn) String() string   { return "built in function" }
+func (*BuiltIn) Type() ObjectType { return BuiltInType }
+func (*BuiltIn) Inspect() string  { return BuiltInStr }
+func (b *BuiltIn) String() string { return b.String() }
 
 type Integer struct {
 	Value int64
 }
 
-func (_ *Integer) Type() ObjectType { return IntegerType }
-func (_ *Integer) String() string   { return "INTEGER" }
-func (o *Integer) Inspect() string  { return fmt.Sprintf("%d", o.Value) }
+func (*Integer) Type() ObjectType { return IntegerType }
+func (*Integer) Inspect() string  { return IntegerStr }
+func (i *Integer) String() string { return fmt.Sprintf("%d", i.Value) }
 
 type String struct {
 	Value string
 }
 
 func (_ *String) Type() ObjectType { return StringType }
-func (_ *String) String() string   { return "STRING" }
-func (o *String) Inspect() string  { return o.Value }
+func (_ *String) Inspect() string  { return StringStr }
+func (o *String) String() string   { return o.Value }
 
 type Boolean struct {
 	Value bool
 }
 
 func (_ *Boolean) Type() ObjectType { return BooleanType }
-func (_ *Boolean) String() string   { return "BOOLEAN" }
-func (o *Boolean) Inspect() string  { return fmt.Sprintf("%t", o.Value) }
+func (_ *Boolean) Inspect() string  { return BooleanStr }
+func (o *Boolean) String() string   { return fmt.Sprintf("%t", o.Value) }
 
 type Null struct{}
 
 func (_ *Null) Type() ObjectType { return NullType }
-func (_ *Null) Inspect() string  { return "null" }
-func (_ *Null) String() string   { return "NULL" }
+func (_ *Null) Inspect() string  { return NullStr }
+func (_ *Null) String() string   { return NullStr }
 
 type ReturnValue struct {
 	Value Object
 }
 
 func (_ *ReturnValue) Type() ObjectType { return ReturnType }
-func (_ *ReturnValue) String() string   { return "RETURN" }
-func (o *ReturnValue) Inspect() string  { return o.Value.Inspect() }
+func (_ *ReturnValue) Inspect() string  { return ReturnStr }
+func (o *ReturnValue) String() string   { return o.Value.Inspect() }
 
 type Error struct {
 	Message string
 }
 
 func (_ *Error) Type() ObjectType { return ErrorType }
-func (_ *Error) String() string   { return "ERROR" }
-func (o *Error) Inspect() string  { return fmt.Sprintf("ERROR : %s", o.Message) }
+func (_ *Error) Inspect() string  { return ErrorStr }
+func (o *Error) String() string   { return fmt.Sprintf("ERROR : %s", o.Message) }
 
 type Function struct {
 	Parameters []*ast.Identifier
@@ -89,8 +76,8 @@ type Function struct {
 }
 
 func (o *Function) Type() ObjectType { return FunctionType }
-func (o *Function) String() string   { return "FUNCTION" }
-func (o *Function) Inspect() string {
+func (o *Function) Inspect() string  { return FunctionStr }
+func (o *Function) String() string {
 	var sb strings.Builder
 
 	sb.WriteString("fn")
@@ -103,7 +90,7 @@ func (o *Function) Inspect() string {
 
 		sb.WriteString(param.String())
 	}
-	sb.WriteString(") { \n")
+	sb.WriteString(") { \n\t")
 
 	sb.WriteString(o.Body.String())
 	sb.WriteString("\n}")
