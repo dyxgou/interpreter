@@ -37,7 +37,15 @@ type String struct {
 
 func (_ *String) Type() ObjectType { return StringType }
 func (_ *String) Inspect() string  { return StringStr }
-func (o *String) String() string   { return o.Value }
+func (o *String) String() string {
+	var sb strings.Builder
+
+	sb.WriteByte('"')
+	sb.WriteString(o.Value)
+	sb.WriteByte('"')
+
+	return sb.String()
+}
 
 type Boolean struct {
 	Value bool
