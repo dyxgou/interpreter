@@ -2,7 +2,7 @@ run: build
 	@ ./bin/interpreter
 
 execute: build_execute
-	@ ./bin/executer $(ARGS)
+	@ ./bin/executer $(FILE)
 
 
 build_execute:
