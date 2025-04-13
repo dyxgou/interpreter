@@ -479,7 +479,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 func (p *Parser) parseExpressionList(lit string, end token.TokenKind) []ast.Expression {
 	elems := make([]ast.Expression, 0, 20)
 
-	if p.readTokenIs(token.RPAREN) {
+	if p.expectRead(end) {
 		p.nextToken()
 		return elems
 	}

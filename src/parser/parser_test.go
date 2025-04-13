@@ -704,6 +704,7 @@ func TestParseStringLiteral(t *testing.T) {
 }
 
 func TestParseArrayLiteral(t *testing.T) {
+	// Empty list works as wel but don't try to test them because for some reason declaring just "[]" gives an error but "let arr = [] is ok"
 	input := `[1, 2, 3, 4, 5, 6]`
 
 	p := New(lexer.New(input))
