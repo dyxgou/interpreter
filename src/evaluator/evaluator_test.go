@@ -307,3 +307,76 @@ func TestArrayLiteral(t *testing.T) {
 	testIntegerObject(t, array.Elements[1], 4)
 	testIntegerObject(t, array.Elements[2], 6)
 }
+
+func TestArrayIndexExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{
+			"[1, 2, 3][0]",
+			1,
+		},
+		{
+			"[1, 2, 3][1]",
+			2,
+		},
+		{
+			"[1, 2, 3][2]",
+			3,
+		},
+		{
+			"let i = 0; [1][i];",
+			1,
+		},
+		{
+			"[1, 2, 3][1 + 1];",
+			3,
+		},
+		{
+			"let myArray = [1, 2, 3]; myArray[2];",
+			3,
+		},
+		{
+			"let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
+			6,
+		},
+		{
+			"let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]",
+			2,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestArrayIndexExpressionError(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			"[1, 2, 3][3]",
+			"index out of bounds. got=3",
+		},
+		{
+			"[1, 2, 3][-1]",
+			"index out of bounds. got=-1",
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		err, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Fatalf("array index expression expected=*object.Error. got=%T", evaluated)
+		}
+
+		if err.Message != tt.expected {
+			t.Fatalf("error message expected=%q. got=%q", tt.expected, err.String())
+		}
+	}
+}
