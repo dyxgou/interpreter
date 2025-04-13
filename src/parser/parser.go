@@ -480,7 +480,6 @@ func (p *Parser) parseExpressionList(lit string, end token.TokenKind) []ast.Expr
 	elems := make([]ast.Expression, 0, 20)
 
 	if p.expectRead(end) {
-		p.nextToken()
 		return elems
 	}
 
