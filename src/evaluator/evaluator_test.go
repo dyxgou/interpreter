@@ -189,8 +189,7 @@ func TestErrorHandeling(t *testing.T) {
 		if !ok {
 			t.Log(tt.input)
 			t.Log(evaluated.Inspect())
-			t.Errorf("no err object returned. got=%T (%+v)", evaluated, evaluated)
-			continue
+			t.Fatalf("no err object returned. got=%T (%+v)", evaluated, evaluated)
 		}
 
 		if objErr.Message != tt.expectedMessage {
