@@ -294,7 +294,7 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Enviroment) object.Objec
 }
 
 func evalIdentifier(node *ast.Identifier, env *object.Enviroment) object.Object {
-	if bi, ok := builtins[node.Value()]; ok {
+	if bi, ok := getBuiltins(node.Value()); ok {
 		return bi
 	}
 
