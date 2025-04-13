@@ -60,7 +60,7 @@ func Execute(text string, out io.Writer) {
 	evaluated := evaluator.Eval(program, env)
 
 	if evaluated != nil {
-		io.WriteString(out, evaluated.Inspect())
+		io.WriteString(out, evaluated.String())
 		io.WriteString(out, "\n")
 	}
 }
