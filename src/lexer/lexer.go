@@ -94,6 +94,8 @@ func (l *Lexer) NextToken() token.Token {
 		t = token.New(token.COMMA, string(l.ch))
 	case ';':
 		t = token.New(token.SEMI, string(l.ch))
+	case ':':
+		t = token.New(token.COLON, string(l.ch))
 	case '+':
 		t = token.New(token.PLUS, string(l.ch))
 	case '-':

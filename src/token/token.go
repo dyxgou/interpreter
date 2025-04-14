@@ -25,6 +25,7 @@ const (
 
 	// Delimiters
 	COMMA
+	COLON
 	SEMI
 
 	LPAREN
