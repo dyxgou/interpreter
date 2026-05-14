@@ -75,7 +75,7 @@ var builtins = map[string]*object.BuiltIn{
 
 			arr := x.(*object.Array)
 			if n := len(arr.Elements); n > 1 {
-				elems := make([]object.Object, n-1, n-1)
+				elems := make([]object.Object, n-1)
 				copy(elems, arr.Elements[1:n])
 
 				return &object.Array{Elements: elems}
